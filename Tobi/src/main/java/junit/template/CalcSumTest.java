@@ -23,7 +23,11 @@ public class CalcSumTest {
 	}
 	@Test
 	public void multiplyOfNumbers() throws IOException {
-		assertThat(calculator.calcMultiply(this.numFilepath),is(10));
+		assertThat(calculator.calcMultiply(this.numFilepath),is(24));
+	}
+	@Test
+	public void oncatenateString() throws IOException {
+		assertThat(calculator.concatenate(this.numFilepath),is("1234"));
 	}
 
 }
