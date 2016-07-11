@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
+import user.domain.Level;
 import user.domain.User;
 
 
@@ -32,6 +33,9 @@ public class UserDaoJdbc implements UserDao {
 			user.setId(arg0.getString("id"));
 			user.setName(arg0.getString("name"));
 			user.setPassword(arg0.getString("password"));
+			user.setLevel(Level.valueOf(arg0.getInt("level")));
+			user.setLogin(arg0.getInt("login"));
+			user.setRecommand(arg0.getInt("recommand"));
 			return user;
 		}		};
 
@@ -64,8 +68,8 @@ public class UserDaoJdbc implements UserDao {
 //		);
 		
 		//오버로딩 된 메소드 사용
-		this.jdbcTemplate.update("insert into users(id, name, password) values(?,?,?)"
-				, user.getId(), user.getName(), user.getPassword());
+		this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommand) values(?,?,?,?,?,?)"
+				, user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommand());
 	}
 
 	//예외 처리는 jdbcTemplete에서 처리.
@@ -156,5 +160,20 @@ public class UserDaoJdbc implements UserDao {
 		ps.close();
 		c.close();
 		return count;*/
+	}
+
+	/**
+	 * 회원정보 수정 메소드
+	 * where절을 빠트렸을 때 나는 테스트를 확인하기 위해
+	 * 1. jdbc템플릿의 update 메소드 리턴값을 확인
+	 * 2. 테스트 코드에서 다른 user 객체를 한번 더 비교
+	 * @param user1
+	 */
+	@Override
+	public void update(User user1) {
+		this.jdbcTemplate.update("update users set name=?, password=?, "
+				+ "level=?, login=?, recommand=? where id=?"
+				,user1.getName(), user1.getPassword(), user1.getLevel().intValue(), 
+				user1.getLogin(), user1.getRecommand(), user1.getId());
 	}
 }

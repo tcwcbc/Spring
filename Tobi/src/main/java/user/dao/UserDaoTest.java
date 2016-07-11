@@ -22,6 +22,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import user.domain.Level;
 import user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -45,12 +46,16 @@ public class UserDaoTest {
 	public void setUp() {
 		this.dao = this.context.getBean("userDao", UserDao.class);
 		
-		this.user1 = new User("gyumee", "이름1", "springno1");
-		this.user2 = new User("leegw700", "이름2", "springno2");
-		this.user3 = new User("bumjin", "이름3", "springno3");
+		this.user1 = new User("gyumee", "이름1", "springno1",Level.BASIC, 1, 0);
+		this.user2 = new User("leegw700", "이름2", "springno2", Level.SILVER, 55, 10);
+		this.user3 = new User("bumjin", "이름3", "springno3", Level.GOLD, 100, 40);
 
 	}
 	
+	/**
+	 * DB에 저장이 잘 되었는지 테스트
+	 * @throws SQLException
+	 */
 	@Test 
 	public void andAndGet() throws SQLException {		
 		dao.deleteAll();
@@ -61,14 +66,17 @@ public class UserDaoTest {
 		assertThat(dao.getCount(), is(2));
 		
 		User userget1 = dao.get(user1.getId());
-		assertThat(userget1.getName(), is(user1.getName()));
-		assertThat(userget1.getPassword(), is(user1.getPassword()));
+		checkSameUser(userget1, user1);
 		
 		User userget2 = dao.get(user2.getId());
-		assertThat(userget2.getName(), is(user2.getName()));
-		assertThat(userget2.getPassword(), is(user2.getPassword()));
+		checkSameUser(userget2, user2);
+		
 	}
 
+	/**
+	 * DB가 비어있을 경우
+	 * @throws SQLException
+	 */
 	@Test(expected=EmptyResultDataAccessException.class)
 	public void getUserFailure() throws SQLException {
 		dao.deleteAll();
@@ -77,7 +85,10 @@ public class UserDaoTest {
 		dao.get("unknown_id");
 	}
 
-	
+	/**
+	 * 몇개인지확인
+	 * @throws SQLException
+	 */
 	@Test
 	public void count() throws SQLException {
 		dao.deleteAll();
@@ -94,7 +105,10 @@ public class UserDaoTest {
 	}
 	
 
-	
+	/**
+	 * DB에 모든 값 가져오기
+	 * @throws SQLException
+	 */
 	@Test
 	public void getAll() throws SQLException {
 		dao.deleteAll();
@@ -120,14 +134,42 @@ public class UserDaoTest {
 		checkSameUser(user1, users3.get(1));  
 		checkSameUser(user2, users3.get(2));  
 	}
+	
+	/**
+	 * 수정 테스트
+	 */
+	@Test
+	public void update() {
+		dao.deleteAll();
+		
+		dao.add(user1);
+		dao.add(user2);
+		
+		user1.setName("최병철");
+		user1.setPassword("tcwcbc");
+		user1.setLevel(Level.GOLD);
+		user1.setLogin(1000);
+		user1.setRecommand(999);
+		dao.update(user1);
+		
+		User user1update = dao.get(user1.getId());
+		checkSameUser(user1update, user1);
+		User user2update = dao.get(user2.getId());
+		checkSameUser(user2update, user2);
+	}
 
 	private void checkSameUser(User user1, User user2) {
 		assertThat(user1.getId(), is(user2.getId()));
 		assertThat(user1.getName(), is(user2.getName()));
 		assertThat(user1.getPassword(), is(user2.getPassword()));
+		assertThat(user1.getLevel(), is(user2.getLevel()));
+		assertThat(user1.getLogin(), is(user2.getLogin()));
+		assertThat(user1.getRecommand(), is(user2.getRecommand()));
 	}
 	
-	
+	/**
+	 * 중복체크
+	 */
 	@Test(expected=DataAccessException.class)
 	public void duplicateKey(){
 		dao.deleteAll();
