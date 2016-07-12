@@ -36,6 +36,7 @@ public class UserDaoJdbc implements UserDao {
 			user.setLevel(Level.valueOf(arg0.getInt("level")));
 			user.setLogin(arg0.getInt("login"));
 			user.setRecommand(arg0.getInt("recommand"));
+			user.setEmail(arg0.getString("email"));
 			return user;
 		}		};
 
@@ -68,8 +69,8 @@ public class UserDaoJdbc implements UserDao {
 //		);
 		
 		//오버로딩 된 메소드 사용
-		this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommand) values(?,?,?,?,?,?)"
-				, user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommand());
+		this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommand, email) values(?,?,?,?,?,?,?)"
+				, user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommand(), user.getEmail());
 	}
 
 	//예외 처리는 jdbcTemplete에서 처리.
@@ -167,13 +168,14 @@ public class UserDaoJdbc implements UserDao {
 	 * where절을 빠트렸을 때 나는 테스트를 확인하기 위해
 	 * 1. jdbc템플릿의 update 메소드 리턴값을 확인
 	 * 2. 테스트 코드에서 다른 user 객체를 한번 더 비교
+	 * 
 	 * @param user1
 	 */
 	@Override
 	public void update(User user1) {
 		this.jdbcTemplate.update("update users set name=?, password=?, "
-				+ "level=?, login=?, recommand=? where id=?"
+				+ "level=?, login=?, recommand=?, email=? where id=?"
 				,user1.getName(), user1.getPassword(), user1.getLevel().intValue(), 
-				user1.getLogin(), user1.getRecommand(), user1.getId());
+				user1.getLogin(), user1.getRecommand(), user1.getEmail(), user1.getId());
 	}
 }

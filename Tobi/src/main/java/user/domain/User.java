@@ -11,6 +11,8 @@ public class User {
 	//추천 횟수, 이 값이 30 이상이면 GOLE로 등급 업
 	int recommand;
 	
+	String email;
+	
 	public Level getLevel() {
 		return level;
 	}
@@ -38,15 +40,24 @@ public class User {
 	public User() {
 	}
 	
-	public User(String id, String name, String password, Level level, int login, int recommand) {
+	public User(String id, String name, String password, Level level, int login, int recommand, String email) {
 		this.id = id;
 		this.name = name;
 		this.password = password;
 		this.level = level;
 		this.login = login;
 		this.recommand = recommand;
+		this.email = email;
 	}
 	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public String getId() {
 		return id;
 	}
