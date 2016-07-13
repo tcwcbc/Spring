@@ -3,6 +3,7 @@ package user.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import javax.sql.DataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
@@ -40,6 +42,9 @@ public class UserServiceTest {
 	@Autowired
 	UserService userService;
 	
+	@Autowired
+	UserServiceImpl userServiceImpl;
+	
 //	@Autowired
 //	UserLevelUpgradePolicyEx userPolicy;
 	
@@ -60,31 +65,46 @@ public class UserServiceTest {
 	@Before
 	public void setUp(){
 		users = Arrays.asList(
-				new User("Test1","테스트1","p1",Level.BASIC, userService.MIN_LOGCOUNT_FOR_SILVER-1, 0,"Test1@test.com"),
-				new User("Test2","테스트2","p2",Level.BASIC, userService.MIN_LOGCOUNT_FOR_SILVER, 0,"Test2@test.com"),
-				new User("Test3","테스트3","p3",Level.SILVER, 60, userService.MIN_RECOMMANDCOUNT_FOR_GOLD-1,"Test3@test.com"),
-				new User("Test4","테스트4","p4",Level.SILVER, 60, userService.MIN_RECOMMANDCOUNT_FOR_GOLD,"Test4@test.com"),
+				new User("Test1","테스트1","p1",Level.BASIC, userServiceImpl.MIN_LOGCOUNT_FOR_SILVER-1, 0,"Test1@test.com"),
+				new User("Test2","테스트2","p2",Level.BASIC, userServiceImpl.MIN_LOGCOUNT_FOR_SILVER, 0,"Test2@test.com"),
+				new User("Test3","테스트3","p3",Level.SILVER, 60, userServiceImpl.MIN_RECOMMANDCOUNT_FOR_GOLD-1,"Test3@test.com"),
+				new User("Test4","테스트4","p4",Level.SILVER, 60, userServiceImpl.MIN_RECOMMANDCOUNT_FOR_GOLD,"Test4@test.com"),
 				new User("Test5","테스트5","p5",Level.GOLD, 100, Integer.MAX_VALUE,"Test5@test.com")
 				);
 	}
 	
 	@Test
-	@DirtiesContext
-	public void upgradeLevels() throws SQLException{
-		userDao.deleteAll();
-		for(User user : users) userDao.add(user);
+	public void upgradeLevels() throws Exception{
+		//목 오브젝트를 사용한 클래스(내부의 static 클래스, 상속받은 클래스)
+		UserServiceImpl userServiceImpl = new UserServiceImpl();
+		
+		//Mockito 프레임웍을 활용한 목 오브젝트 생성
+		//getAll메소드를 
+		MockUserDao mockUserDao = new MockUserDao(this.users);
+//		when(mockUserDao.getAll()).thenReturn(this.users);
+//		MockUserDao mockUserDao = new MockUserDao(this.users);
+		userServiceImpl.setUserDao(mockUserDao);
+		
+		//실제 DB를 가지고 테스트
+//		userDao.deleteAll();
+//		for(User user : users) userDao.add(user);
 		
 		MockMailSender mockMailSender = new MockMailSender();
-		userService.setMailSender(mockMailSender);
+		userServiceImpl.setMailSender(mockMailSender);
 		
 		
-		userService.upgradeLevels();
+		userServiceImpl.upgradeLevels();
 		
-		checkLevel(users.get(0), false);
-		checkLevel(users.get(1), true);
-		checkLevel(users.get(2), false);
-		checkLevel(users.get(3), true);
-		checkLevel(users.get(4), false);
+		List<User> updated = mockUserDao.getUpdated();
+		assertThat(updated.size(), is(2));
+		checkUserAndLevel(updated.get(0), "Test2", Level.SILVER);
+		checkUserAndLevel(updated.get(1), "Test4", Level.GOLD);
+		
+//		checkLevel(users.get(0), false);
+//		checkLevel(users.get(1), true);
+//		checkLevel(users.get(2), false);
+//		checkLevel(users.get(3), true);
+//		checkLevel(users.get(4), false);
 		
 		List<String> requset = mockMailSender.getRequsets();
 		assertThat(requset.size(), is(2));
@@ -99,7 +119,11 @@ public class UserServiceTest {
 		}else{
 			assertThat(userUpdate.getLevel(), is(user.getLevel()));
 		}
-		
+	}
+	
+	private void checkUserAndLevel(User updated, String expectedId,Level expectedLevel) {
+		assertThat(updated.getId(), is(expectedId));
+		assertThat(updated.getLevel(), is(expectedLevel));
 	}
 	
 	@Test
@@ -126,16 +150,20 @@ public class UserServiceTest {
 	 */
 	@Test
 	public void upgradeAllOrNothing() throws Exception {
-		UserService testUserService = new TestUserService(users.get(3).getId());
+		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao);
-		testUserService.setTransactionManager(this.transactionManager);
 		testUserService.setMailSender(this.mailSender);
 		
+		UserServiceTx serviceTx = new UserServiceTx();
+		serviceTx.setTransactionManager(this.transactionManager);
+		serviceTx.setUserService(testUserService);
+		
+
 		userDao.deleteAll();
 		for(User user : users) userDao.add(user);
 		
 		try{
-			testUserService.upgradeLevels();
+			serviceTx.upgradeLevels();
 //			fail("TestUserServiceException expected");
 		}catch(TestUserServiceException e){}
 		
@@ -147,7 +175,7 @@ public class UserServiceTest {
 	 * @author 최병철
 	 *
 	 */
-	static class TestUserService extends UserService{
+	static class TestUserService extends UserServiceImpl{
 		private String id;
 		
 		private TestUserService(String id){
@@ -171,6 +199,7 @@ public class UserServiceTest {
 	 *
 	 */
 	static class MockMailSender implements MailSender{
+
 		
 		private List<String> requsts = new ArrayList<String>();
 		
@@ -189,6 +218,71 @@ public class UserServiceTest {
 		public void send(SimpleMailMessage[] arg0) throws MailException {
 			// TODO Auto-generated method stub
 			
+		}
+		
+	}
+	
+	
+	/**
+	 * UserServiceTest 클래스 내에서 사용자 레벨 업그레이드 테스트를 위한
+	 * 목 클래스
+	 * @author 최병철
+	 *
+	 */
+	static class MockUserDao implements UserDao{
+		
+		private List<User> users;
+		private List<User> updated = new ArrayList<User>();
+
+		private MockUserDao(List<User> users){
+			this.users = users;
+		}
+		
+		private List<User> getUpdated(){
+			return this.updated;
+		}
+		
+		@Override
+		public void add(User user) {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public User get(String id) {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<User> getAll() {
+			// TODO Auto-generated method stub
+			return this.users;
+		}
+
+		@Override
+		public void deleteAll() {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException();
+			
+		}
+
+		@Override
+		public int getCount() {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setDataSource(DataSource dataSource) {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void update(User user1) {
+			// TODO Auto-generated method stub
+			updated.add(user1);
 		}
 		
 	}
