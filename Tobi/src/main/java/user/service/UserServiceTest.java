@@ -1,10 +1,13 @@
 package user.service;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
+import static user.service.UserServiceImpl.*;
 
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +19,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
@@ -40,10 +45,21 @@ import user.domain.User;
 @DirtiesContext
 public class UserServiceTest {
 	@Autowired
+	@Qualifier("userSerivce")
 	UserService userService;
-	
+//	
+//	@Autowired
+//	@Qualifier("userServiceImpl")
+//	UserServiceImpl userServiceImpl;
+//	
 	@Autowired
-	UserServiceImpl userServiceImpl;
+	ApplicationContext context;
+	
+	//같은 타입 빈이 두 개 존재하면 필드명을 기준으로 결정 됨(X)
+	//@Qualifier로 빈 id 지정해줘야함
+	@Autowired
+	@Qualifier("testUserSerivce")
+	UserService testUserService;
 	
 //	@Autowired
 //	UserLevelUpgradePolicyEx userPolicy;
@@ -65,10 +81,10 @@ public class UserServiceTest {
 	@Before
 	public void setUp(){
 		users = Arrays.asList(
-				new User("Test1","테스트1","p1",Level.BASIC, userServiceImpl.MIN_LOGCOUNT_FOR_SILVER-1, 0,"Test1@test.com"),
-				new User("Test2","테스트2","p2",Level.BASIC, userServiceImpl.MIN_LOGCOUNT_FOR_SILVER, 0,"Test2@test.com"),
-				new User("Test3","테스트3","p3",Level.SILVER, 60, userServiceImpl.MIN_RECOMMANDCOUNT_FOR_GOLD-1,"Test3@test.com"),
-				new User("Test4","테스트4","p4",Level.SILVER, 60, userServiceImpl.MIN_RECOMMANDCOUNT_FOR_GOLD,"Test4@test.com"),
+				new User("Test1","테스트1","p1",Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0,"Test1@test.com"),
+				new User("Test2","테스트2","p2",Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0,"Test2@test.com"),
+				new User("Test3","테스트3","p3",Level.SILVER, 60, MIN_RECOMMANDCOUNT_FOR_GOLD-1,"Test3@test.com"),
+				new User("Test4","테스트4","p4",Level.SILVER, 60, MIN_RECOMMANDCOUNT_FOR_GOLD,"Test4@test.com"),
 				new User("Test5","테스트5","p5",Level.GOLD, 100, Integer.MAX_VALUE,"Test5@test.com")
 				);
 	}
@@ -149,21 +165,39 @@ public class UserServiceTest {
 	 * @throws Exception SQLException
 	 */
 	@Test
+//	@DirtiesContext		//컨텍스트 무효화
 	public void upgradeAllOrNothing() throws Exception {
-		TestUserService testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(this.userDao);
-		testUserService.setMailSender(this.mailSender);
+//		TestUserService testUserService = new TestUserService(users.get(3).getId());
+//		testUserService.setUserDao(this.userDao);
+//		testUserService.setMailSender(this.mailSender);
+//
+//		//팩토리 빈 자체를 가져오기 위해서 '&' 필요
+//		ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", ProxyFactoryBean.class);
+//		
+//		txProxyFactoryBean.setTarget(testUserService);
 		
-		UserServiceTx serviceTx = new UserServiceTx();
-		serviceTx.setTransactionManager(this.transactionManager);
-		serviceTx.setUserService(testUserService);
+		//변경된 타겟으로 다시 객체 생성
+//		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 		
+		//기존의 중복되었던 코드가 많던 UserServiceTx 프록시
+//		UserServiceTx serviceTx = new UserServiceTx();
+//		serviceTx.setUserService(testUserService);
+		
+//		//리플렉션을 활용한 TransactionHandler 다이나믹 프록시
+//		TransactionHandler transactionHandler = new TransactionHandler();
+//		transactionHandler.setTransactionManager(this.transactionManager);
+//		transactionHandler.setPattern("upgradeLevels");
+//		transactionHandler.setTarget(testUserService);
+//		
+//		UserService txUserService = (UserService) Proxy.newProxyInstance(getClass().getClassLoader(),
+//				new Class[] {UserService.class}, transactionHandler);
 
 		userDao.deleteAll();
 		for(User user : users) userDao.add(user);
 		
 		try{
-			serviceTx.upgradeLevels();
+			testUserService.upgradeLevels();
+//			serviceTx.upgradeLevels();
 //			fail("TestUserServiceException expected");
 		}catch(TestUserServiceException e){}
 		
@@ -172,15 +206,17 @@ public class UserServiceTest {
 	
 	/**
 	 * 트렌잭션 문제를 일으키기위한 UserService 클래스
+	 * 프록시 적용을 시켜주기 위한 클래스 이름 변경 : TestUserServic->TestUserServiceImpl
 	 * @author 최병철
 	 *
 	 */
-	static class TestUserService extends UserServiceImpl{
-		private String id;
+	static class TestUserServiceImpl extends UserServiceImpl{
+		//강제로 제외시켜주기 위한 users(3) 아이디 주입
+		private String id="Test4";
 		
-		private TestUserService(String id){
-			this.id = id;
-		}
+//		private TestUserService(String id){
+//			this.id = id;
+//		}
 		
 		public void upgradeLevel(User user) {
 			if(user.getId().equals(this.id)) throw new TestUserServiceException();
