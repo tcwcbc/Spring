@@ -26,15 +26,21 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import user.dao.UserDao;
 import user.domain.Level;
@@ -42,7 +48,12 @@ import user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
-@DirtiesContext
+//@DirtiesContext
+@Transactional	//해당 클래스 내의 일부분만 트랜잭션 적용을 하지 않으려면
+				//@Transactional(propagation=Propagation.NEVER)
+
+//롤백 안되게 설정
+//@TransactionConfiguration(defaultRollback=false)
 public class UserServiceTest {
 	@Autowired
 	@Qualifier("userSerivce")
@@ -73,8 +84,8 @@ public class UserServiceTest {
 	@Autowired
 	UserDao userDao;
 	
-	@Autowired
-	DataSource dataSource;
+//	@Autowired
+//	DataSource dataSource;
 	
 	List<User> users;
 	
@@ -157,7 +168,7 @@ public class UserServiceTest {
 		User userWithoutLevelRead = userDao.get(userWithoutLevel.getId());
 		
 		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
-		assertThat(userWithoutLevelRead.getLevel(), is(userWithoutLevel.getLevel()));
+		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
 	}
 	
 	/**
@@ -198,10 +209,47 @@ public class UserServiceTest {
 		try{
 			testUserService.upgradeLevels();
 //			serviceTx.upgradeLevels();
-//			fail("TestUserServiceException expected");
+			fail("TestUserServiceException expected");
 		}catch(TestUserServiceException e){}
 		
 		checkLevel(users.get(1), false);
+	}
+	@Test(expected=TransientDataAccessResourceException.class)
+	public void readOnlyTransactionAttribute(){
+		testUserService.getAll();
+	}
+	
+	/**
+	 * 트랜잭션 전파 테스트
+	 */
+	@Test
+	public void transactionSync(){
+		userDao.deleteAll();
+		assertThat(userDao.getCount(), is(0));
+		DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+//		txDefinition.setReadOnly(true);
+		TransactionStatus status = transactionManager.getTransaction(txDefinition);
+		try{
+			
+			userService.add(users.get(0));
+			userService.add(users.get(1));
+			assertThat(userDao.getCount(), is(2));
+		}finally{
+			transactionManager.rollback(status);
+			assertThat(userDao.getCount(), is(0));
+		}
+	}
+	
+	/**
+	 * 테스트 메소드에 트랜잭션을 적용
+	 * 테스트용 트랜잭션은 끝나면 자동으로 롤백 됨
+	 */
+	@Test 
+	@Transactional(readOnly=true)	//읽기 전용
+	@Rollback(false) 	//원래 테스트 메소드에 @Transaction을 붙이 면 롤백되나 이 구문으로 롤백이 안됨, 메소드레벨만 적용 가능
+						//클래스 레벨에 적용할때는 @TransactionConfiguration 사용
+	public void trancationSync1(){
+		userService.deleteAll();
 	}
 	
 	/**
@@ -217,10 +265,19 @@ public class UserServiceTest {
 //		private TestUserService(String id){
 //			this.id = id;
 //		}
-		
+		@Override
 		public void upgradeLevel(User user) {
 			if(user.getId().equals(this.id)) throw new TestUserServiceException();
 			super.upgradeLevel(user);
+		}
+		
+		@Override
+		public List<User> getAll() {
+			// TODO Auto-generated method stub
+			for(User user : super.getAll()){
+				super.update(user);
+			}
+			return null;
 		}
 	}
 	

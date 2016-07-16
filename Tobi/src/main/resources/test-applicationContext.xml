@@ -2,8 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 						
 						
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
@@ -12,6 +14,69 @@
 		<property name="username" value="root" />
 		<property name="password" value="1234" />
 	</bean>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+			<!-- AOP 시작 -->
+		
+		<aop:config>
+			<aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)"/>
+		</aop:config>
+	
+	<!-- 
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
+	<bean id="transactionPointcut" class="user.service.NameMatchClassMethodPointcut">
+		<property name="mappedClassName" value="*ServiceImpl"></property>
+		<property name="mappedName" value="upgrade*"></property>
+	</bean> -->
+	<!--
+	<bean id="transactionPointcut" class="org.springframework.aop.aspectj.AspectJExpressionPointcut">
+		 <property name="expression" value="execution(* *..*ServiceImpl.upgrade*(..))"></property> 
+		<property name="expression" value="bean(*Service)"></property>
+	</bean>
+	
+	<bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		<property name="advice" ref="trsansactionAdvice"></property>
+		<property name="pointcut" ref="transactionPointcut"></property>
+	</bean>
+	-->
+	
+	
+	<!-- AOP 끝 -->
+	
+		<!-- 트랜잭션 설정 시작 : 메소드 별로 트랜잭션을 어떻게 실행할지에 대한 설정값을 properties로 설정-->
+	<!-- 
+	<bean id="transactionAdvice" class="user.service.TransactionAdvice">
+		<property name="transactionManager" ref="transactionManager"></property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="get*">PROPAGATION_REQUIRED,readOnly,timeout_30</prop>
+				<prop key="upgrade*">PROPAGATION_REQUIRED_NEW,ISOLATION_SERIALIZABLE</prop>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+	 -->
+	 <!-- 
+	 <tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+	 	<tx:attributes>
+	 		<tx:method name="get*" propagation="REQUIRED" timeout="30"/>
+	 		<tx:method name="upgrade*" propagation="REQUIRES_NEW" isolation="SERIALIZABLE"/>
+	 		<tx:method name="*" propagation="REQUIRED"/>
+	 	</tx:attributes>
+	 </tx:advice>
+ -->	
+	 <!-- transactionMananger는 id값이 transactionManager라면 생략가능 -->
+	 <tx:advice id="transactionAdvice" >
+	 	<tx:attributes>
+	 		<!-- propagation 값은 REQUIRED라면 생략가능 -->
+	 		<tx:method name="get*" read-only="true"/>
+	 		<tx:method name="*" />
+	 	</tx:attributes>
+	 </tx:advice>
+	
+	<!-- 트랜잭션 설정 끝-->
 	
 	<bean id="userDao" class="user.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
@@ -29,9 +94,7 @@
 	</bean>
 	-->
 	
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
+	
 
 	<bean id="mailSender" class="user.service.DummyMailSender">
 	</bean>
@@ -66,35 +129,6 @@
 	<!-- static 클래스는 '$'기호 사용, 상속받은 부모 빈 등록 : 설정 프로퍼티도 상속됨 -->
 	<bean id="testUserSerivce" class="user.service.UserServiceTest$TestUserServiceImpl"
 			parent="userSerivce"></bean>
-			
-			
-	
-		<!-- AOP 시작 -->
-		
-		<aop:config>
-			<aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut"/>
-		</aop:config>
-	
-	<bean id="transactionAdvice" class="user.service.TransactionAdvice">
-		<property name="transactionManager" ref="transactionManager"></property>
-	</bean>
-	
-	<!-- 
-	<bean id="transactionPointcut" class="user.service.NameMatchClassMethodPointcut">
-		<property name="mappedClassName" value="*ServiceImpl"></property>
-		<property name="mappedName" value="upgrade*"></property>
-	</bean> -->
-	
-	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
-	<bean id="transactionPointcut" class="org.springframework.aop.aspectj.AspectJExpressionPointcut">
-		<property name="expression" value="execution(* *..*ServiceImpl.upgrade*(..))"></property>
-	</bean>
-	
-	<bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-		<property name="advice" ref="transactionAdvice"></property>
-		<property name="pointcut" ref="transactionPointcut"></property>
-	</bean>
-	
-	<!-- AOP 끝 -->
+
 	
 </beans>

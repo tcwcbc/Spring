@@ -167,10 +167,31 @@ public class UserServiceImpl implements UserService {
 	 * 새로운 회원이 가입할때 등급 기본값을 BASIC으로 세팅
 	 * @param user
 	 */
-	
 	public void add(User user) {
 		if(user.getLevel() == null) user.setLevel(Level.BASIC);
 		userDao.add(user);
+	}
+	@Override
+	public User get(String id) {
+		// TODO Auto-generated method stub
+		return userDao.get(id);
+	}
+	@Override
+	public List<User> getAll() {
+		// TODO Auto-generated method stub
+		return userDao.getAll();
+	}
+	@Override
+	public void deleteAll() {
+		// TODO Auto-generated method stub
+		userDao.deleteAll();
+		
+	}
+	@Override
+	public void update(User user) {
+		// TODO Auto-generated method stub
+		userDao.update(user);
+		
 	}
 	
 }
