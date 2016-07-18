@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -19,7 +20,20 @@ import user.domain.Level;
 import user.domain.User;
 
 
+
 public class UserDaoJdbc implements UserDao {
+	
+	private SqlService sqlService;
+	//Sql문을 가져오는 인터페이스를 DI
+	public void setSqlService(SqlService service){
+		this.sqlService = service;
+	}
+	
+//	private Map<String, String> sqlMap;
+//	//UserDao 클래스의 sql문 주입
+//	public void setSqlMap(Map<String, String> sqlMap){
+//		this.sqlMap = sqlMap;
+//	}
 //	private DataSource dataSource;
 	//직접 JDBCContext를 구현한 것 사용
 //	private JdbcContext jdbcContext;
@@ -69,15 +83,19 @@ public class UserDaoJdbc implements UserDao {
 //		);
 		
 		//오버로딩 된 메소드 사용
-		this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommand, email) values(?,?,?,?,?,?,?)"
+		this.jdbcTemplate.update(
+//				"insert into users(id, name, password, level, login, recommand, email) values(?,?,?,?,?,?,?)"
+				this.sqlService.getSql("userAdd")
 				, user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommand(), user.getEmail());
 	}
 
 	//예외 처리는 jdbcTemplete에서 처리.
 	public User get(String id){
 		//로우매퍼를 사용한 rs로 객체를 만들어 반환하는 메소드
-		return this.jdbcTemplate.queryForObject("select * from users where id = ?",
-				new Object[]{id}, this.rowMapper);
+		return this.jdbcTemplate.queryForObject(
+//				"select * from users where id = ?"
+				this.sqlService.getSql("userGet")
+				,new Object[]{id}, this.rowMapper);
 		
 		/*Connection c = this.dataSource.getConnection();
 		PreparedStatement ps = c
@@ -105,8 +123,10 @@ public class UserDaoJdbc implements UserDao {
 	
 	//예외 처리는 jdbcTemplete에서 처리.
 	public List<User> getAll() {
-		return this.jdbcTemplate.query("select * from users order by id", 
-				this.rowMapper);
+		return this.jdbcTemplate.query(
+//				"select * from users order by id"
+				this.sqlService.getSql("userGetAll")
+				,this.rowMapper);
 		
 	}
 
@@ -122,7 +142,10 @@ public class UserDaoJdbc implements UserDao {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				// TODO Auto-generated method stub
-				return con.prepareStatement("delete from users");
+				return con.prepareStatement(
+//						"delete from users"
+						sqlService.getSql("userDeleteAll")
+						);
 			}
 		});
 	}
@@ -135,7 +158,10 @@ public class UserDaoJdbc implements UserDao {
 			@Override
 			public PreparedStatement createPreparedStatement(Connection arg0) throws SQLException {
 				// TODO Auto-generated method stub
-				return arg0.prepareStatement("select count(*) from users");
+				return arg0.prepareStatement(
+//						"select count(*) from users"
+						sqlService.getSql("userGetCount")
+						);
 			}
 		}, new ResultSetExtractor<Integer>() {
 			
@@ -173,8 +199,9 @@ public class UserDaoJdbc implements UserDao {
 	 */
 	@Override
 	public void update(User user1) {
-		this.jdbcTemplate.update("update users set name=?, password=?, "
-				+ "level=?, login=?, recommand=?, email=? where id=?"
+		this.jdbcTemplate.update(
+//				"update users set name=?, password=?, level=?, login=?, recommand=?, email=? where id=?"
+				this.sqlService.getSql("userUpdate")
 				,user1.getName(), user1.getPassword(), user1.getLevel().intValue(), 
 				user1.getLogin(), user1.getRecommand(), user1.getEmail(), user1.getId());
 	}
