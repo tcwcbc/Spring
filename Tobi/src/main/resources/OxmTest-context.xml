@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 스프링의 oxm 서비스 추상화 인터페이스를 구현한 클래스, 프로퍼티에 바인딩 클래스의 경로 주입 
+	<bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="contextPath" value="user.sqlservice.jaxb"></property>
+	</bean>
+	-->
+	<!-- Castor용 OXM 구현 클래스 -->
+	<bean id="unmarshaller" class="org.springframework.oxm.castor.CastorMarshaller">
+		<property name="mappingLocation" value="user/dao/mapping.xml"></property>	
+	</bean>
+
+</beans>

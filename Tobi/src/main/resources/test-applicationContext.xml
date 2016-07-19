@@ -90,12 +90,36 @@
 	</bean>
 	
 	<!-- Xml형식으로 저장된 SQL을 가져와 언마샬링 해주는 클래스를 DI, SqlReader,SqlRegistry,SqlService 세가지의
-	     인터페이스를 구현한 클래스, 자기자신을 프로퍼티로 참조 -->
+	     인터페이스를 구현한 클래스, 자기자신을 프로퍼티로 참조 
 	<bean id="sqlService" class="user.dao.XmlSqlService">
 		<property name="sqlReader" ref="sqlService"></property>
 		<property name="sqlRegistry" ref="sqlService"></property>
 		<property name="sqlmapFilePath" value="sqlmap.xml"></property>
+	</bean>-->
+	
+	<!-- SqlReader, SqlService, SqlRegistry를 별도의 빈으로 분리 
+	<bean id="sqlService" class="user.dao.BasicSqlService">
+		<property name="sqlReader" ref="sqlReader"></property>
+		<property name="sqlRegistry" ref="sqlRegistry"></property>
 	</bean>
+	
+	<bean id="sqlReader" class="user.dao.JaxbSqlReader">
+		<property name="sqlmapFilePath" value="sqlmap.xml"></property>
+	</bean>
+	
+	<bean id="sqlRegistry" class="user.dao.HashMapSqlRegistry"></bean>
+	-->
+	<!-- 의존 오브젝트를 스스로 내부에서 DI하는 빈, 프로퍼티를 넣으면 적용되고 안넣으면 디폴트 값 적용 
+	<bean id="sqlService" class="user.dao.DefaultSqlService"></bean>
+	-->
+	<bean id="sqlService" class="user.dao.OxmSqlService">
+		<property name="unmarshaller" ref="unmarshaller"></property>
+		<!-- 프로퍼티로 Classpath Di하면 웹이나 파일 시스템에서 xml 파일을 읽어옴 -->
+	</bean>
+	<bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="contextPath" value="user.sqlservice.jaxb"></property>
+	</bean>
+	
 	<!-- SQL을 map형식의 자료구조로 직접 Di 
 	<bean id="sqlService" class="user.dao.SimpleSqlService">
 		<property name="sqlMap">
@@ -110,6 +134,7 @@
 		</property>
 	</bean>
 	-->
+	
 	<!-- 
 	<bean id="userService" class="user.service.UserServiceTx">
 		<property name="transactionManager" ref="transactionManager" />

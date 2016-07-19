@@ -2,13 +2,18 @@ package user.dao;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * SqlRegistry 구현클래스
+ * @author 최병철
+ *
+ */
 public class HashMapSqlRegistry implements SqlRegistry{
 	private Map<String , String> sqlMap = new HashMap<String, String>();
 	
 	@Override
 	public void registerSql(String key, String value) {
 		// TODO Auto-generated method stub
+		sqlMap.put(key, value);
 	}
 
 	@Override
