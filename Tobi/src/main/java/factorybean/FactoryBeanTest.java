@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 //설정하지 않으면 디폴트로 클래스명-context.xml로 바인딩 됨
-@ContextConfiguration
+@ContextConfiguration(locations="file:src/main/resources/FactoryBeanTest-context.xml")
 public class FactoryBeanTest {
 
 	@Autowired

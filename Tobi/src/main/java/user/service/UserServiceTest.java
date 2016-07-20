@@ -46,6 +46,14 @@ import user.dao.UserDao;
 import user.domain.Level;
 import user.domain.User;
 
+
+/**
+ * upgradeAllOrNothing 테스트에서 트랜잭션이 안먹힘.
+ * 큰일 남. 이것때문에 readOnlyTransactionAttribute 테스트도 실패하는듯
+ * 빨리해결해야함.
+ * @author 최병철
+ *
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/test-applicationContext.xml")
 //@DirtiesContext
