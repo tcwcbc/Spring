@@ -11,9 +11,9 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 						
-	<!-- @Transactional 어노테이션으로 부가기능 프록시 추가 -->
-	<tx:annotation-driven/>
-	<!-- @PostConstruct와 같은 어노테이션으로 빈 후처리 및 초기화 기능 사용 -->
+	<!-- @Transactional 어노테이션으로 부가기능 프록시 추가 
+	<tx:annotation-driven/>-->
+	<!-- @PostConstruct와 같은 어노테이션으로 빈 후처리 및 초기화 기능 사용 
 	<context:annotation-config></context:annotation-config>
 	
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
@@ -24,13 +24,13 @@
 	</bean>
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />
-	</bean>
+	</bean>-->
 	
-			<!-- AOP 시작 -->
+			<!-- AOP 시작 
 		
 		<aop:config>
 			<aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)"/>
-		</aop:config>
+		</aop:config>-->
 	
 	<!-- 
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"></bean>
@@ -76,22 +76,21 @@
 	 </tx:advice>
 	 -->
  
-	 <!-- transactionMananger는 id값이 transactionManager라면 생략가능-->
+	 <!-- transactionMananger는 id값이 transactionManager라면 생략가능, propagation 값은 REQUIRED라면 생략가능
 	 <tx:advice id="transactionAdvice" >
 	 	<tx:attributes>
-	 		<!--  propagation 값은 REQUIRED라면 생략가능 --> 
 	 		<tx:method name="get*" read-only="true"/>
 	 		<tx:method name="*" />
 	 	</tx:attributes>
 	 </tx:advice>
-	 
+	  --> 
 	<!-- 트랜잭션 설정 끝-->
-	
+	<!-- 
 	<bean id="userDao" class="user.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
 		<property name="sqlService" ref="sqlService"></property>
 	</bean>
-	
+	 -->
 	<!-- Xml형식으로 저장된 SQL을 가져와 언마샬링 해주는 클래스를 DI, SqlReader,SqlRegistry,SqlService 세가지의
 	     인터페이스를 구현한 클래스, 자기자신을 프로퍼티로 참조 
 	<bean id="sqlService" class="user.dao.XmlSqlService">
@@ -115,15 +114,16 @@
 	<!-- 의존 오브젝트를 스스로 내부에서 DI하는 빈, 프로퍼티를 넣으면 적용되고 안넣으면 디폴트 값 적용 
 	<bean id="sqlService" class="user.dao.DefaultSqlService"></bean>
 	-->
+	
+	<!-- 프로퍼티로 Classpath Di하면 웹이나 파일 시스템에서 xml 파일을 읽어옴 
 	<bean id="sqlService" class="user.dao.OxmSqlService">
 		<property name="unmarshaller" ref="unmarshaller"></property>
-		<!-- 프로퍼티로 Classpath Di하면 웹이나 파일 시스템에서 xml 파일을 읽어옴 -->
 		 <property name="sqlRegistry" ref="sqlRegistry"></property> 
-	</bean>
+	</bean>-->
 	<!-- 스프링에서 제공하는 동시성을 보장하는 클래스 
 	<bean id="sqlRegistry" class="user.dao.concurrent.ConcurrentHashMapSqlRegistry"></bean>
 	-->
-	<!-- 내장 DB를 사용하는 sqlRegistry 클래스 DI -->
+	<!-- 내장 DB를 사용하는 sqlRegistry 클래스 DI 
 	<bean id="sqlRegistry" class="user.dao.EmbeddedDbSqlRegistry">
 		<property name="dataSource" ref="embeddedDatabase"></property>
 	</bean>
@@ -131,13 +131,13 @@
 	<bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
 		<property name="contextPath" value="user.sqlservice.jaxb"></property>
 	</bean>
-	
+	-->
 	<!-- 내장DB의 초기화를 위해 빌더를 사용하는데 이는 팩토리빈으로 만들면 좋음, 
-		팩토리 빈형식으로 만들어주는 태그 -->
+		팩토리 빈형식으로 만들어주는 태그 
 	<jdbc:embedded-database id="embeddedDatabase" type="HSQL">
 		<jdbc:script location="classpath:embeddeddb/schema.sql"/>
 	</jdbc:embedded-database>
-	
+	-->
 	<!-- SQL을 map형식의 자료구조로 직접 Di 
 	<bean id="sqlService" class="user.dao.SimpleSqlService">
 		<property name="sqlMap">
@@ -163,12 +163,12 @@
 		<property name="userDao" ref="userDao"/>
 		<property name="mailSender" ref="mailSender"></property>
 	</bean>
-	-->
+	
 	
 	
 
 	<bean id="mailSender" class="user.service.DummyMailSender">
-	</bean>
+	</bean>-->
 	
 	<!-- 
 	<bean id="userService" class="user.service.TxProxyFactoryBean">
@@ -188,7 +188,7 @@
 			</list>
 		</property>R
 	</bean>
-	 -->
+	 
 	
 	
 	
@@ -196,10 +196,10 @@
 		<property name="userDao" ref="userDao"></property>
 		<property name="mailSender" ref="mailSender"></property>
 	</bean>
-	
-	<!-- static 클래스는 '$'기호 사용, 상속받은 부모 빈 등록 : 설정 프로퍼티도 상속됨 -->
+	-->
+	<!-- static 클래스는 '$'기호 사용, 상속받은 부모 빈 등록 : 설정 프로퍼티도 상속됨
 	<bean id="testUserSerivce" class="user.service.UserServiceTest$TestUserServiceImpl"
 			parent="userSerivce"></bean>
-
+ -->
 	
 </beans>

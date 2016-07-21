@@ -9,20 +9,29 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import user.domain.Level;
 import user.domain.User;
 
-
-
+//해당 클래스를 빈으로 자동 등록, 빈의 아이디는 클래스명으로 디폴트, 괄호안에 빈 아이디 지정 가능
+//@Component("userDao")
+//@Component를 메타에노테이션(상속과 유사한 개념)으로 갖는 애노테이션
+@Repository
 public class UserDaoJdbc implements UserDao {
 	
+	//컨텍스트에서 자동으로 DI받음, 리플렉션 API를 통해 접근제한자를 우회하기 때문에
+	//세터를 거치지 않고 직접 DI받기 때문에 세터는 굳이 필요X
+	//만약 세터 안에서 어떠한 작업이 있다면 안됨
+	@Autowired
 	private SqlService sqlService;
 	//Sql문을 가져오는 인터페이스를 DI
 	public void setSqlService(SqlService service){
@@ -54,6 +63,9 @@ public class UserDaoJdbc implements UserDao {
 			return user;
 		}		};
 
+		//@AutoWired가 세터에 있으면 파라미터 타입을 보고 빈을 찾아 주입
+		//만약 두개라면 프로퍼티 이름을 보고 동일한 것을 주입
+	@Autowired
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 //		this.jdbcContext = new JdbcContext();

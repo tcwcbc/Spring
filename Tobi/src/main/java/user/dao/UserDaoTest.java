@@ -22,11 +22,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import applicationcontext.AppContext;
 import user.domain.Level;
 import user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/test-applicationContext.xml")
+//@ContextConfiguration(locations="/test-applicationContext.xml")
+//설정파일을 xml -> java로 바꿈
+@ContextConfiguration(classes=AppContext.class)
 @DirtiesContext
 public class UserDaoTest {
 	@Autowired

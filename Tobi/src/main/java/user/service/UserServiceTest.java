@@ -42,6 +42,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import applicationcontext.AppContext;
 import user.dao.UserDao;
 import user.domain.Level;
 import user.domain.User;
@@ -55,42 +56,40 @@ import user.domain.User;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/test-applicationContext.xml")
+//@ContextConfiguration(locations="/test-applicationContext.xml")
+//설정파일을 xml -> java로 바꿈
+@ContextConfiguration(classes=AppContext.class)
 //@DirtiesContext
-@Transactional	//해당 클래스 내의 일부분만 트랜잭션 적용을 하지 않으려면
+//@Transactional	//해당 클래스 내의 일부분만 트랜잭션 적용을 하지 않으려면
 				//@Transactional(propagation=Propagation.NEVER)
 
 //롤백 안되게 설정
 //@TransactionConfiguration(defaultRollback=false)
 public class UserServiceTest {
-	@Autowired
-	@Qualifier("userSerivce")
+	@Autowired 
+	@Qualifier("userService")
 	UserService userService;
 //	
 //	@Autowired
 //	@Qualifier("userServiceImpl")
 //	UserServiceImpl userServiceImpl;
 //	
-	@Autowired
-	ApplicationContext context;
+	@Autowired ApplicationContext context;
 	
 	//같은 타입 빈이 두 개 존재하면 필드명을 기준으로 결정 됨(X)
 	//@Qualifier로 빈 id 지정해줘야함
-	@Autowired
-	@Qualifier("testUserSerivce")
+	@Autowired 
+	@Qualifier("testUserService")
 	UserService testUserService;
 	
 //	@Autowired
 //	UserLevelUpgradePolicyEx userPolicy;
 	
-	@Autowired
-	MailSender mailSender;
+	@Autowired MailSender mailSender;
 	
-	@Autowired
-	PlatformTransactionManager transactionManager;
+	@Autowired PlatformTransactionManager transactionManager;
 	
-	@Autowired
-	UserDao userDao;
+	@Autowired UserDao userDao;
 	
 //	@Autowired
 //	DataSource dataSource;
@@ -266,7 +265,7 @@ public class UserServiceTest {
 	 * @author 최병철
 	 *
 	 */
-	static class TestUserServiceImpl extends UserServiceImpl{
+	public static class TestUserService extends UserServiceImpl{
 		//강제로 제외시켜주기 위한 users(3) 아이디 주입
 		private String id="Test4";
 		

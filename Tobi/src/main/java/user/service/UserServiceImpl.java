@@ -19,6 +19,8 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -35,8 +37,9 @@ import user.domain.User;
  * DAO는 순수하게 DB접근을 위한 행동을 하고
  * 비지니스 로직은 여기서 구현ㄴ
  * @author 최병철
- *
  */
+//@Component를 메타데이터로 갖는 빈 자동등록 애노테이션, 주로 비지니스로직에 적용
+@Service("userService")
 public class UserServiceImpl implements UserService {
 	public static final int MIN_LOGCOUNT_FOR_SILVER=50;
 	public static final int MIN_RECOMMANDCOUNT_FOR_GOLD=30;
@@ -47,7 +50,7 @@ public class UserServiceImpl implements UserService {
 //		this.policy = policy;
 //	}
 	
-	
+	@Autowired
 	UserDao userDao;
 	/**
 	 * xml로 DI
@@ -63,6 +66,7 @@ public class UserServiceImpl implements UserService {
 //		this.dataSource = dataSource;
 //	}
 	
+	@Autowired
 	MailSender mailSender;
 	
 	public void setMailSender(MailSender mailSender){
