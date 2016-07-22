@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,6 +20,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -29,6 +31,10 @@ import user.domain.User;
 @RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration(locations="/test-applicationContext.xml")
 //설정파일을 xml -> java로 바꿈
+//AppContext에서 모든 설정파일을 임포트했지만 각 컨텍스트를 프로파일링 했기때문에 
+//@Activeprofile을 안해주면 DI가 안됨. 중복되는 빈들을 분리해서 운영환경에 맞게
+//사용하고자 하는 설정파일들의 프로파일 명을 지정해주면 됨
+@ActiveProfiles("test")
 @ContextConfiguration(classes=AppContext.class)
 @DirtiesContext
 public class UserDaoTest {
@@ -36,9 +42,11 @@ public class UserDaoTest {
 	ApplicationContext context;
 	
 	@Autowired
+	@Qualifier("userDaoJdbc")
 	 UserDao dao; 
 	
 	@Autowired
+	@Qualifier("dataSource")
 	DataSource dataSource;
 	
 	private User user1;

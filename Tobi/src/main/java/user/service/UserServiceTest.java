@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
@@ -34,6 +35,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -58,6 +60,7 @@ import user.domain.User;
 @RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration(locations="/test-applicationContext.xml")
 //설정파일을 xml -> java로 바꿈
+@ActiveProfiles("test")
 @ContextConfiguration(classes=AppContext.class)
 //@DirtiesContext
 //@Transactional	//해당 클래스 내의 일부분만 트랜잭션 적용을 하지 않으려면
@@ -257,6 +260,18 @@ public class UserServiceTest {
 						//클래스 레벨에 적용할때는 @TransactionConfiguration 사용
 	public void trancationSync1(){
 		userService.deleteAll();
+	}
+	
+	/**
+	 * 빈팩토리가 빈들을 관리하는 DefaultListableBeanFactory를 동적주입받아
+	 * getBeanDefinitionNames() 로 확인하는 클래스
+	 */
+	@Autowired DefaultListableBeanFactory bf;
+	@Test
+	public void beans(){
+		for(String n : bf.getBeanDefinitionNames()){
+			System.out.println(n+"\t"+bf.getBean(n).getClass().getName());
+		}
 	}
 	
 	/**
