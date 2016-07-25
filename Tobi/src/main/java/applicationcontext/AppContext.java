@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -35,6 +37,7 @@ import user.dao.SqlService;
 import user.dao.UserDao;
 import user.dao.UserDaoJdbc;
 import user.service.DummyMailSender;
+import user.service.SqlMapConfig;
 import user.service.UserService;
 import user.service.UserServiceImpl;
 import user.service.UserServiceTest.TestUserService;
@@ -57,6 +60,8 @@ import user.service.UserServiceTest.TestUserService;
  *             테스트용 빈들은 TestAppContext로 분리해냄
  */
 @Configuration
+//애노테이션을 할용하여  외부 Context 파일임포트
+@EnableSqlService
 @EnableTransactionManagement
 // @ImportResource("/test-applicationContext.xml")
 // @Component를 통해 빈으로 자동 등록된 오브젝트들을 스캔(범위)
@@ -64,16 +69,16 @@ import user.service.UserServiceTest.TestUserService;
 // 서비스 계층의 컨텍스트를 분리하고 임포트로 다시 결합, 클라이언트에서 설정파일을 설정할 때
 // 다시 classes에 추가하지 않아도 됨
 // 따로 클래스파일로 분리했던 컨텍스트들을 내부 스태틱 클래스로 놓고 임포트
-@Import({ SqlServiceContext.class
-		/*
-		 * 내부 중첩 클래스로 정의한 설정 파일들은 임포트 선언을 안해줘도 된다. ,
-		 * AppContext.TestAppContext.class,
-		 * AppContext.ProductionAppContext.class
-		 */
-})
+//@Import({ SqlServiceContext.class
+//		/*
+//		 * 내부 중첩 클래스로 정의한 설정 파일들은 임포트 선언을 안해줘도 된다. ,
+//		 * AppContext.TestAppContext.class,
+//		 * AppContext.ProductionAppContext.class
+//		 */
+//})
 //프로퍼티 파일을 가져오는 애노테이션
 @PropertySource("/database.properties")
-public class AppContext {
+public class AppContext implements SqlMapConfig{
 	
 	//치환자 : XML 설정에서 value 값을 치환하는 것과 유사
 	@Value("${db.driverClass}") Class<? extends Driver> driverClass;
@@ -87,8 +92,9 @@ public class AppContext {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 	
+	
 	//프로퍼티 파일을 관리하는 Enviroment객체를  DI 받아 DataSource 설정
-	@Autowired Environment ev;
+//	@Autowired Environment ev;
 	// 1. <context:annotation-config/> 삭제
 	// - 빈 생성 후처리기 등록을 위한 태그(@PostConstruct)
 	// 2. dataSource빈 변환
@@ -194,5 +200,13 @@ public class AppContext {
 			javaMailSenderImpl.setHost("localhost");
 			return javaMailSenderImpl;
 		}
+	}
+
+	//별도의 클래스를 생성하지 않고 AppContext가 직접 SqlMapConfig 인터페이스를 구현.
+	//설정파일 자체도 하나의 빈이기 때문에 가능
+	@Override
+	public Resource getSqlMapConfig() {
+		// TODO Auto-generated method stub
+		return new ClassPathResource("sqlmap.xml", UserDao.class);
 	}
 }

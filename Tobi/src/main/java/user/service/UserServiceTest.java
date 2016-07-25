@@ -120,6 +120,7 @@ public class UserServiceTest {
 		MockUserDao mockUserDao = new MockUserDao(this.users);
 //		when(mockUserDao.getAll()).thenReturn(this.users);
 //		MockUserDao mockUserDao = new MockUserDao(this.users);
+		
 		userServiceImpl.setUserDao(mockUserDao);
 		
 		//실제 DB를 가지고 테스트

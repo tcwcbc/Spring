@@ -44,6 +44,9 @@ public class OxmSqlService implements SqlService{
 		this.oxmSqlReader.setSqlmap(sqlmap);
 	}
 	
+
+	
+	
 	@PostConstruct
 	public void loadSql(){
 		//basicSqlService에 SqlReader와 sqlRegistry를 주입하여 위임
@@ -75,7 +78,8 @@ public class OxmSqlService implements SqlService{
 		//setter는 outter 클래스에
 		private Unmarshaller unmarshaller;
 //		private static final String DEFAULT_SQLMAP_FILE_PATH = "sqlmap.xml";
-		private Resource sqlmap = new ClassPathResource("sqlmap.xml", UserDao.class);
+//		private Resource sqlmap = new ClassPathResource("sqlmap.xml", UserDao.class);
+		private Resource sqlmap = new ClassPathResource("sqlmap.xml");
 		
 		//외부에서 수동으로 Di 받음
 		public void setUnmarshaller(Unmarshaller unmarshaller) {
@@ -103,4 +107,6 @@ public class OxmSqlService implements SqlService{
 		}
 		
 	}
+
+
 }
