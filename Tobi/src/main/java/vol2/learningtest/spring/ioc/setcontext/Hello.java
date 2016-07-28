@@ -1,9 +1,11 @@
 package vol2.learningtest.spring.ioc.setcontext;
 
+
 public class Hello {
 	String name;
-	Printer printer;
 	
+	
+	Printer printer;
 
 	public void setName(String name) {
 		this.name = name;

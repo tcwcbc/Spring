@@ -3,7 +3,9 @@ package vol2.learningtest.spring.ioc.setcontext;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
+
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -11,11 +13,16 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import vol2.learningtest.spring.ioc.setbean.AnnotatedHello;
+import vol2.learningtest.spring.ioc.setbean.AnnotatedHelloConfig;
+import vol2.learningtest.spring.ioc.setbean.HelloConfig;
 
 public class IocTest {
 	//현재 클래스의 패키지정보를 클래스패스 형식으로 만듦
@@ -113,4 +120,21 @@ public class IocTest {
 		hello.print();
 		assertThat(printer.toString(), is("Hello Child"));
 	}
+	
+	/**
+	 * 빈 스캐닝 테스트, @Component 에서 빈ID를 등록 안하면 클래스 이름으로 자동 등록
+	 */
+	@Test
+	public void simpleBeanScanning() {
+		//설정한 하위 파일들에 대해서만 스캐닝
+		ApplicationContext ctx = new AnnotationConfigApplicationContext("vol2.learningtest.spring.ioc.setbean");
+		AnnotatedHello hello = ctx.getBean("annotatedHello", AnnotatedHello.class);
+		assertThat(hello, is(notNullValue()));
+		
+		AnnotatedHelloConfig annotatedHelloConfighelloConfig = ctx.getBean("annotatedHelloConfig", AnnotatedHelloConfig.class);
+		assertThat(annotatedHelloConfighelloConfig, is(notNullValue()));
+		//같은 오브젝트인지 확인
+		assertThat(annotatedHelloConfighelloConfig.annotatedHello(), is(sameInstance(hello)));
+	}
+
 }
