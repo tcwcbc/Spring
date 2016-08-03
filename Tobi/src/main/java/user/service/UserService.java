@@ -14,6 +14,6 @@ public interface UserService {
 	List<User> getAll();
 	void deleteAll();
 	void update(User user);
-	void add(User user);
+	void add(User user); 
 	void upgradeLevels();
 }
