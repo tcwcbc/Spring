@@ -1,4 +1,4 @@
-package com.spring.mvc.hello;
+package com.spring.mvc;
 
 import java.io.IOException;
 

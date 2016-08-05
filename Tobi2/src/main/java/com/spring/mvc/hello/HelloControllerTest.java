@@ -12,6 +12,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.spring.mvc.ConfigurableDispatcherServlet;
+
 /**
  * HelloController Å×½ºÆ®
  * 
