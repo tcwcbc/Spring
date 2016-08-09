@@ -26,7 +26,7 @@ import com.spring.mvc.AbstractDispatcherServletTest;
  * 2. HttpRequest 타입	: 서블릿타입과 유사, Remote Method Invocation과 같은 로우레벨 기능사용하기 위함
  * 3. Controller 타입	: 어노테이션컨트롤러 이전엔 대표적인 컨트롤러였음. 
  * 						인터페이스 Controller -> 구현클래스 AbstractController -> 상속 MyController
- * 4. Annotated 타입
+ * 4. Annotated 타입		: 컨트롤러 클래스와 메소드에 붙인 애노테이션과 형식을 파악하여 매핑
  * 
  * SimpleServletHandlerAdapter를 제외한 나머지 핸들러어댑터는 디폴트 전략으로 등록이 되어 있으므로 따로 등록해줄 필요 X
  * @author 최병철

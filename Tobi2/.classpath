@@ -26,5 +26,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/mockito-all-1.8.4.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.org.castor.xml-1.3.2.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.org.castor.core-1.3.2.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/org.springframework.oxm-3.1.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.org.codehaus.jackson.mapper-1.4.2.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.org.codehaus.jackson-1.4.2.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.net.sf.cglib-2.2.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
