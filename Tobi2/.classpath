@@ -32,5 +32,8 @@
 	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.org.codehaus.jackson.mapper-1.4.2.jar"/>
 	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.org.codehaus.jackson-1.4.2.jar"/>
 	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.net.sf.cglib-2.2.0.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/org.springframework.orm-3.1.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/mysql-connector-java-5.1.7-bin.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/org.springframework.transaction-3.1.2.RELEASE.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
