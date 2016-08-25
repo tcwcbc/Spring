@@ -35,5 +35,7 @@
 	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/org.springframework.orm-3.1.2.RELEASE.jar"/>
 	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/mysql-connector-java-5.1.7-bin.jar"/>
 	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/org.springframework.transaction-3.1.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.org.joda.time-1.6.0.jar"/>
+	<classpathentry kind="lib" path="D:/토비예제/Vol2-31/lib/com.springsource.javax.validation-1.0.0.GA.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

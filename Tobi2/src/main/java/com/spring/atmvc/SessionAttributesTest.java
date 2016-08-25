@@ -54,6 +54,7 @@ public class SessionAttributesTest extends AbstractDispatcherServletTest {
 		//SesstionStatus.setComplete()로 세션이 해제되었는지 확인
 		assertThat(session.getAttribute("user"), is(nullValue()));
 	}
+	
 
 
 	@Controller
